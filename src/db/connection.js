@@ -9,6 +9,7 @@ const connection = mysql.createPool({
   multipleStatements: true,
 });
 
+//Make sure that the server is actually connected to the db
 connection.query("SELECT 1", function (error, results, fields) {
   if (error) throw error;
   // connected!
