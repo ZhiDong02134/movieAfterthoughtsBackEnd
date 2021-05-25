@@ -10,7 +10,7 @@ Installation:
 npm install
 ```
 
-* Download MySQL from [MySQL](https://www.mysql.com/) 
+* Download MySQL from [MySQL](https://www.mysql.com/)
 
 * Set up MySQL on local machine and retrieve your MySQL host, user, password.
 
