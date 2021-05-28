@@ -50,4 +50,35 @@ router.get("/", auth, (req, res) => {
   );
 });
 
+//@route DELETE comment
+//@desc Delete a comment
+router.delete("/:id", auth, (req, res) => {
+  connection.query(
+    "select * from postComments where userId = ? and id = ?;",
+    [req.id, req.params.id],
+    (err, rows) => {
+      if (err) {
+        console.error(err);
+        return res.sendStatus(500);
+      }
+      if (!rows.length) {
+        return res
+          .status(400)
+          .json({ error: "Can't delete a comment that you never created" });
+      }
+      connection.query(
+        "delete from postComments where id = ?;",
+        [req.params.id],
+        err => {
+          if (err) {
+            console.error(err);
+            return res.sendStatus(500);
+          }
+          res.sendStatus(204);
+        }
+      );
+    }
+  );
+});
+
 module.exports = router;
