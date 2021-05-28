@@ -87,20 +87,19 @@ router.post("/login", validateLogin, (req, res) => {
 //@route  Deleted users
 //@desc   Delete User
 router.delete("/:id", auth, (req, res) => {
-  connection.query(
-    "delete from users where id = ?;",
-    [req.params.id],
-    (err, rows) => {
-      if (err) {
-        return res.sendStatus(500);
-      }
-      if (!rows.affectedRows) {
-        return res.status(400).json({ error: "User doesn't exist" });
-      }
-
-      res.sendStatus(204);
+  const userId = parseInt(req.params.id, 10);
+  if (req.id !== userId) {
+    return res
+      .status(400)
+      .json({ error: "User can only delete their own account." });
+  }
+  connection.query("delete from users where id = ?;", [userId], (err, rows) => {
+    if (err) {
+      return res.sendStatus(500);
     }
-  );
+
+    res.sendStatus(204);
+  });
 });
 
 module.exports = router;
