@@ -93,7 +93,7 @@ router.delete("/:id", auth, (req, res) => {
       .status(400)
       .json({ error: "User can only delete their own account." });
   }
-  connection.query("delete from users where id = ?;", [userId], (err, rows) => {
+  connection.query("delete from users where id = ?;", [userId], err => {
     if (err) {
       return res.sendStatus(500);
     }
