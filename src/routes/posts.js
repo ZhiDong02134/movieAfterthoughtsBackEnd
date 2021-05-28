@@ -82,7 +82,7 @@ router.patch("/:id", auth, validatePost, (req, res) => {
 //@desc Retrieve all posts
 router.get("/", auth, (req, res) => {
   connection.query(
-    "select posts.id as id, updatedAt, postDetails, rating, movieId, userId, title, releaseDate, posterSrc, overallRating, firstName, lastName from posts join movies on posts.movieId = movies.id join users on posts.userId = users.id order by createdAt desc;",
+    "select posts.id as id, updatedAt, postDetails, rating, movieId, userId, title, releaseDate, posterSrc, overallRating, firstName, lastName from posts join movies on posts.movieId = movies.id join users on posts.userId = users.id order by updatedAt desc;",
     (err, rows) => {
       if (err) {
         console.error(err);
