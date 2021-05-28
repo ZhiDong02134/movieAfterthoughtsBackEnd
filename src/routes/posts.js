@@ -43,23 +43,37 @@ router.post("/", auth, validatePost, (req, res) => {
   );
 });
 
-//@route POST post
-//@desc  Edit post to db
-router.post("/:id", auth, validatePost, (req, res) => {
-  const { movieId = "", rating = "", postDetails = "" } = req.body;
-  //update posts set postDetails = 'i like cookies'
+//@route PATCH post
+//@desc  Edit post
+router.patch("/:id", auth, validatePost, (req, res) => {
+  const { rating = "", postDetails = "" } = req.body;
+  const postId = req.params.id;
   connection.query(
-    "update posts set postDetails = ?, movieId = ?, rating = ?, userId = ? where id = ?; select posts.id as id, updatedAt, postDetails, rating, movieId, userId, title, releaseDate, posterSrc, overallRating, firstName, lastName from posts join movies on posts.movieId = movies.id join users on posts.userId = users.id order by createdAt desc;",
-    [postDetails, movieId, rating, req.id, req.params.id],
+    "select * from posts where userId = ? and id = ?;",
+    [req.id, postId],
     (err, rows) => {
       if (err) {
         console.error(err);
         return res.sendStatus(500);
       }
+      if (!rows.length) {
+        return res
+          .status(400)
+          .json({ error: "Can't edit a post that you never created" });
+      }
+      connection.query(
+        "update posts set postDetails = ?, rating = ? where id = ?; select * from posts where id = ?;",
+        [postDetails, rating, postId, postId],
+        (err, rows) => {
+          if (err) {
+            console.error(err);
+            return res.sendStatus(500);
+          }
 
-      const posts = rows[1];
-
-      res.status(200).json(posts);
+          const updatedPost = rows[1];
+          res.status(200).json(updatedPost);
+        }
+      );
     }
   );
 });
@@ -72,7 +86,7 @@ router.get("/", auth, (req, res) => {
     (err, rows) => {
       if (err) {
         console.error(err);
-        res.sendStatus(500);
+        return res.sendStatus(500);
       }
 
       res.json(rows);
@@ -145,17 +159,29 @@ router.get("/likes", auth, (req, res) => {
 //@desc Delete a post
 router.delete("/:id", auth, (req, res) => {
   connection.query(
-    "delete from posts where id = ?;",
-    [req.params.id],
+    "select * from posts where userId = ? and id = ?;",
+    [req.id, req.params.id],
     (err, rows) => {
       if (err) {
         console.error(err);
-        res.sendStatus(500);
+        return res.sendStatus(500);
       }
-      if (!rows.affectedRows) {
-        return res.status(400).json({ error: "Post doesn't exist" });
+      if (!rows.length) {
+        return res
+          .status(400)
+          .json({ error: "Can't delete a post that you never created" });
       }
-      res.sendStatus(204);
+      connection.query(
+        "delete from posts where id = ?;",
+        [req.params.id],
+        err => {
+          if (err) {
+            console.error(err);
+            return res.sendStatus(500);
+          }
+          res.sendStatus(204);
+        }
+      );
     }
   );
 });
